@@ -125,7 +125,7 @@ const loginUser = asyncHandler(async (req, res) => {
 });
 
   // Logout user
-  const logout = asyncHandler(async(req, res) => {
+  const logoutUser = asyncHandler(async(req, res) => {
     res.cookie("token", "", {
       path: "/",
       httpOnly: true,
@@ -136,8 +136,107 @@ const loginUser = asyncHandler(async (req, res) => {
     return res.status(200).json({message: " Successfully Logged Out!"})
   });
 
+  // Get User Data
+  const getUser = asyncHandler( async(req, res)=>{
+    const user = await User.findById(req.user._id);
+
+    if (user) {
+      const { _id, name, email, contact, address, postcode, bio } = user;
+      res.status(201).json({
+        _id,
+        name,
+        email,
+        contact,
+        address,
+        postcode,
+        bio,
+      });
+    } else {
+      res.status(400);
+      throw new Error("User not found");
+    }
+  });
+
+
+  // Get Login Status
+  const loginStatus = asyncHandler(async(req,res)=>{
+    const token = req.cookies.token;
+    if (!token) {
+      return res.json(false);
+    }
+    // Verify Token
+    const verified = jwt.verify(token, process.env.JWT_SECRET);
+    if (verified) {
+      return res.json(true);
+    }
+    return res.json(false);
+  });
+
+  // Update User
+  const updateUser = asyncHandler(async(req,res)=>{
+    const user = await User.findById(req.user._id);
+
+    if(user){
+    const { name, email, contact, address, postcode, bio } = user;
+    user.email = email;
+    user.name = req.body.name || name;
+    user.contact = req.body.contact || contact;
+    user.address = req.body.address || address;
+    user.postcode = req.body.postcode || postcode;
+    user.bio = req.body.bio || bio;
+
+    const updatedUser = await user.save();
+    res.status(200).json({
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      contact: updatedUser.contact,
+      bio: updatedUser.bio,
+    });
+  }else {
+    res.status(404);
+    throw new Error("User not found");
+  }
+  });
+
+  // Change Password 
+// controllers/userController.js
+const changePassword = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+  const { oldPassword, newPassword } = req.body; // Change password to newPassword
+
+  if (!user) {
+    res.status(400);
+    throw new Error("User not found, please sign up");
+  }
+
+  // Validate 
+  if (!oldPassword || !newPassword) { // Change password to newPassword
+    res.status(400);
+    throw new Error("Please add old and new Password");
+  }
+
+  // Check if old password matches password in DB 
+  const passwordIsCorrect = await bcrypt.compare(oldPassword, user.password);
+
+  // Save new password
+  if (user && passwordIsCorrect) {
+    user.password = newPassword; // Change password to newPassword
+    await user.save();
+    res.status(200).send("Password changed successfully");
+  } else {
+    res.status(400);
+    throw new Error("Old password is incorrect");
+  }
+});
+
+
 module.exports = {
   registerUser,
   loginUser,
-  logout,
+  logoutUser,
+  getUser,
+  loginStatus,
+  updateUser,
+  changePassword,
 };
