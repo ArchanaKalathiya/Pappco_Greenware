@@ -1,11 +1,16 @@
+console.log(`Working directory: ${process.cwd()}`);
 const dotenv = require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const userRoutes = require('./routes/userRoute');
+const productRoutes = require('./routes/productRoute');
+const quotationRoutes = require('./routes/quotationRoute');
+const contactRoute = require('./routes/contactRoute');
 const errorHandler = require('./middlewares/errorMiddleware');
 const cookieParser = require("cookie-parser");
+const path = require("path")
 
 const app = express();
 
@@ -18,8 +23,13 @@ app.use(express.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cors());
 
+app.use("/uploads",express.static(path.join(__dirname, "uploads")))
+
 // Routes
 app.use('/api/users', userRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/quotations', quotationRoutes);
+app.use('/api/contactus', contactRoute);
 
 app.get("/", (req, res) => {
   res.send("Home Page");

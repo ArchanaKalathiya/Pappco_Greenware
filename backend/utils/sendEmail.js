@@ -1,37 +1,41 @@
 const nodemailer = require("nodemailer");
 
-// create email tranporter
-const sendEmail = async(subject, message, send_to, sent_from, reply_to) => {
+// create email transporter using SMTP
+const sendEmail = async (subject, message, send_to, sent_from, reply_to, attachmentPath) => {
     const transporter = nodemailer.createTransport({
-        host: process.env.EMAIL_HOST,
-        port: 587,
+        service: "Gmail", // use Gmail as the service
         auth: {
-            user:process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
+            user: process.env.EMAIL_USER, // your Gmail username
+            pass: process.env.EMAIL_PASS, // your Gmail password or app-specific password
         },
         tls: {
-            rejectUnauthorized: false
-        }
-    })
+            rejectUnauthorized: false, // allow TLS usage
+        },
+    });
 
     // options for sending email
     const options = {
         from: sent_from,
         to: send_to,
-        replyID: reply_to,
+        replyTo: reply_to,
         subject: subject,
         html: message,
-    }
+        attachments: [
+            {
+                filename: attachmentPath.split('/').pop(),
+                path: attachmentPath,
+            },
+        ],
+    };
 
     // send email
-    transporter.sendMail(options, function(err, info){
-        if(err){
-            console.log(err);
-        }else{
-        console.log(info);
+    transporter.sendMail(options, function (err, info) {
+        if (err) {
+            console.error("Error sending email:", err);
+        } else {
+            console.log("Message sent:", info.messageId);
         }
-    })
-    
+    });
 };
 
-module.exports = sendEmail
+module.exports = sendEmail;
