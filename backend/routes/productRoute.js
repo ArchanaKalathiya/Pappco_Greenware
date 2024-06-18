@@ -1,14 +1,25 @@
 const express = require("express");
-const { createProduct, getProduct, getSingleProduct, deleteProduct, updateProduct } = require("../controllers/productController");
-const protect = require("../middlewares/authMiddleware");
+const { 
+    createProduct,
+    getProduct,
+    getSingleProduct, 
+    deleteProduct, 
+    updateProduct, 
+    availableProducts
+} = require("../controllers/productController");
+const {protect, adminOrinventory} = require("../middlewares/authMiddleware");
 const {upload} = require("../utils/fileUpload");
 
 const router = express.Router();
 
-router.post("/", protect, upload.single("image"), createProduct);
-router.patch("/:id", protect, upload.single("image"), updateProduct);
+// Routes for getting products (available to all authenticated users)
 router.get("/", protect, getProduct);
+router.get("/available", protect, availableProducts);
 router.get("/:id", protect, getSingleProduct);
-router.delete("/:id", protect, deleteProduct);
+
+// Routes for creating, updating, and deleting products (restricted to admin)
+router.post("/", protect, adminOrinventory, upload.single("image"), createProduct);
+router.patch("/:id", protect, adminOrinventory, upload.single("image"), updateProduct);
+router.delete("/:id", protect, adminOrinventory,deleteProduct);
 
 module.exports = router;

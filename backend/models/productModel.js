@@ -80,8 +80,10 @@ const productSchema = mongoose.Schema({
     totalCBM: { 
         type: Number,
         required: false,
-    }
-}, { timestamps: true });
+    },
+}, { 
+    timestamps: true
+});
 
 const Product = mongoose.model("Product", productSchema);
 module.exports = Product;

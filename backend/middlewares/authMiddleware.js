@@ -30,4 +30,14 @@ const protect = asyncHandler(async (req, res, next) => {
     }
 });
 
-module.exports = protect;
+const adminOrinventory = (req, res, next) => {
+    if (req.user && req.user.role === "admin" || req.user.role === "inventory") {
+        next();
+    } else {
+        res.status(403);
+        throw new Error("Not authorized as an admin");
+    }
+};
+
+
+module.exports = { protect, adminOrinventory };

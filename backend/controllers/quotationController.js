@@ -1,5 +1,6 @@
 const asyncHandler = require('express-async-handler');
 const Product = require('../models/productModel');
+const Quotation = require('../models/quotationModel');
 const generatePDF = require('../utils/generatePDF');
 const sendEmail = require('../utils/sendEmail');
 const path = require('path');
@@ -113,6 +114,7 @@ const quotation = asyncHandler(async (req, res) => {
             <p>Pappco Greenware</p>
         `;
 
+        //Email to user
         await sendEmail(
             emailSubject,
             emailMessage,
@@ -121,6 +123,44 @@ const quotation = asyncHandler(async (req, res) => {
             process.env.EMAIL_USER,
             path.resolve(__dirname, '../uploads', pdfName)
         );
+
+        //Email to inventory Staff
+        const inventoryEmailSubject = `${userName} - Generated Quotation - ${formattedDate}`;
+        const inventoryEmailMessage = `
+            <p>User Name: ${userName}</p>
+            <p>Email ID: ${userEmail}</p>
+            <p>Contact NO: ${userContact}</p>
+            <p>Post Code: ${userPostcode}</p>
+            <p>Address: ${userAddress}</p>
+            <p>${userName} has generated the attached Quotation ${quotationNumber}.</p>
+            <p>Please find the attached quotation PDF for details.</p>
+        `;
+
+        await sendEmail(
+            inventoryEmailSubject,
+            inventoryEmailMessage,
+            process.env.EMAIL_USER,
+            process.env.EMAIL_USER,
+            process.env.EMAIL_USER,
+            path.resolve(__dirname, '../uploads', pdfName)
+        );
+
+        // await Quotation.create({
+        //     date: formattedDate,
+        //     quotationNumber,
+        //     user: {
+        //       id: userId,
+        //       name: userName,
+        //       address: userAddress,
+        //       postcode: userPostcode,
+        //       email: userEmail,
+        //       contact: userContact
+        //     },
+        //     products: productsWithQuotation,
+        //     totalCBM,
+        //     totalQty: productUpdates.reduce((total, update) => total + update.quantity, 0),
+        //     totalAmount
+        //   });
 
         res.status(200).json({
             message: 'Quotation generated and email sent successfully',
@@ -131,6 +171,27 @@ const quotation = asyncHandler(async (req, res) => {
     });
 });
 
+const getQuotation = asyncHandler(async (req, res) => {
+    const quotation = await Quotation.findById(req.params.id);
+    if (!quotation) {
+        res.status(404);
+        throw new Error('Quotation not found');
+    }
+    res.status(200).json(quotation);
+});
+
+const deleteQuotation = asyncHandler(async (req, res) => {
+    const quotation = await Quotation.findById(req.params.id);
+    if (!quotation) {
+        res.status(404);
+        throw new Error('Quotation not found');
+    }
+    await quotation.remove();
+    res.status(200).json({ message: 'Quotation removed' });
+});
+
 module.exports = {
     quotation,
+    getQuotation,
+    deleteQuotation
 };
