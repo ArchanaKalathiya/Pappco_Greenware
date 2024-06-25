@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import Lottie from "react-lottie-player";
 import animationData from "./lottieAnimation.json";
 import "./Home.scss";
+import { ShowOnLogout, ShowOnLogin } from "../../components/protect/hiddenLink";
 
 const Home = () => {
   useEffect(() => {
@@ -41,15 +42,19 @@ const Home = () => {
           <RiProductHuntLine size={35} />
         </div>
         <ul className="home-links">
-          <li className="register">
-            <Link to="/register">Sign Up</Link>
-          </li>
+          <ShowOnLogout>
+            <li className="register">
+              <Link to="/register">Sign Up</Link>
+            </li>
           <li>
             <Link to="/login">Login</Link>
           </li>
+          </ShowOnLogout>
+          <ShowOnLogin>
           <li>
             <Link to="/dashboard">Dashboard</Link>
           </li>
+          </ShowOnLogin>
         </ul>
       </nav>
       <section className="container">
@@ -66,7 +71,7 @@ const Home = () => {
           </ul>
           <div className="hero-buttons">
             <button className="--btn --btn-secondary button">
-              <Link to="/dashboard" className="button-color">Dashboard</Link>
+              <Link to="https://www.pappcoindia.com/pages/about-us" className="button-color">Know more about us</Link>
               <div className="button__horizontal"></div>
               <div className="button__vertical"></div>
             </button>

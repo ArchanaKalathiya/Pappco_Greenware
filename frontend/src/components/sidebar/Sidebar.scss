@@ -1,32 +1,38 @@
 .layout {
   display: flex;
 }
+
 main {
   width: 100%;
-  // padding: 20px;
   color: #fff;
-  
 }
 
 .--color-danger {
   color: #149c7f;
 }
 
+.user-info p {
+  color: #000;
+  font-size: 8px;
+  font-weight: 600;
+}
+
 .--btn {
-  padding: 8px 15px;
+  padding: 5px 8px;
   border: none;
   cursor: pointer;
+  font-size: 12px;
   transition: background-color 0.3s, color 0.3s;
 }
 
 .--btn-danger {
-  background-color: #149c7f;;
+  background-color: #149c7f;
   color: var(--color-white);
   margin-top: -10px;
 }
 
 .--btn-danger:hover {
-  background-color: #18bc9d; // Use the darker shade here
+  background-color: #18bc9d;
 }
 
 .sidebar {
@@ -38,7 +44,7 @@ main {
   flex-shrink: 0;
   background-color: var(--color-white);
   overflow: auto;
-  color: var(-color-dark);
+  color: var(--color-dark);
   transition: all 0.5s;
 }
 
@@ -46,8 +52,6 @@ main {
   display: flex;
   align-items: center;
   padding: 10px 15px;
-  // border-bottom: 2px solid #ccc;
-  transition: all 0.5s;
   background-color: var(--dark-blue);
   height: 70px;
 
@@ -56,8 +60,8 @@ main {
     color: #fff;
     margin-top: 8px;
   }
-  
 }
+
 .bars {
   display: flex;
   font-size: 25px;
@@ -75,8 +79,6 @@ main {
 .sidebar-item {
   padding: 0.75em 1em;
   display: block;
-  // border-radius: 5px;
-  // border-bottom: 2px solid #ccc;
   background-color: rgba(255, 255, 255, 255);
   transition: background-color 0.15s;
 }
@@ -127,6 +129,7 @@ main {
   height: 0;
   overflow: hidden;
 }
+
 .sidebar-item.open > .sidebar-content {
   height: auto;
 }
@@ -168,4 +171,61 @@ a {
 
 .sublink .sidebar-item .sidebar-title {
   padding-left: 40px;
+}
+
+.header{
+  padding: 10px 20px;
+}
+
+.--flex-between-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.welcome {
+  font-size: 1.2rem;
+  text-align: center;
+  margin-top: 10px;
+  font-weight: 600;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 8px;
+  color: #000;
+  font-weight: 600;
+}
+
+.user-info p {
+  margin: 0 10px;
+}
+
+.dropdown, .port-name {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 8px;
+  color: #000;
+}
+
+.user-info input[type="text"], select {
+  padding: 5px;
+  border: none;
+  border-radius: 10px;
+  box-shadow: inset 2px 2px 5px #ccc, inset -2px -2px 5px #fff;
+  background: #f0f0f3;
+  font-size: 8px;
+  color: #333;
+  outline: none;
+}
+
+.user-info input[type="text"]::placeholder {
+  color: #aaa;
+}
+
+.user-info input[type="text"]:focus, select:focus {
+  box-shadow: inset 2px 2px 5px #ccc, inset -2px -2px 5px #fff;
 }
