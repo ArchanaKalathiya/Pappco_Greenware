@@ -2,6 +2,10 @@
 
 # dependencies
 /node_modules
+
+# Optionally, ignore all node_modules subfolders
+node_modules/**/
+
 /.pnp
 .pnp.js
 

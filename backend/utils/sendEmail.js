@@ -1,7 +1,7 @@
 const nodemailer = require("nodemailer");
 
 // create email transporter using SMTP
-const sendEmail = async (subject, message, send_to, sent_from, reply_to, attachmentPath) => {
+const sendEmail = async (subject, message, send_to, sent_from, reply_to, attachment) => {
     const transporter = nodemailer.createTransport({
         service: "Gmail", // use Gmail as the service
         auth: {
@@ -22,8 +22,8 @@ const sendEmail = async (subject, message, send_to, sent_from, reply_to, attachm
         html: message,
         attachments: [
             {
-                filename: attachmentPath.split('/').pop(),
-                path: attachmentPath,
+                filename: attachment.filename,
+                path: attachment.path,
             },
         ],
     };

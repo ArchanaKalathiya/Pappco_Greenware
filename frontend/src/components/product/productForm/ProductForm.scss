@@ -1,0 +1,119 @@
+.add-product-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  
+  .--mt {
+    color: black;
+    font-size: medium;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    text-align: center;
+  }
+}
+
+.add-product {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin-top: 2rem;
+
+  .card {
+    margin-top: 1rem;
+    width: 100%;
+    max-width: 800px;
+    padding: 2rem;
+    background: #e0e5ec;
+    border-radius: 15px;
+    box-shadow: 20px 20px 60px #b8bcc2, -20px -20px 60px #ffffff;
+  }
+
+  form {
+    label {
+      margin-top: 1rem;
+      display: block;
+      font-size: 1.2rem;
+      font-weight: 500;
+      color: #333;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="file"],
+    input[type="email"],
+    select,
+    input[type="password"] {
+      display: block;
+      font-size: 1.2rem;
+      font-weight: 300;
+      padding: 1rem;
+      margin: 1rem auto;
+      width: 100%;
+      background: #e0e5ec;
+      color: #333;
+      border: none;
+      border-radius: 10px;
+      box-shadow: inset 4px 4px 8px #babecc, inset -4px -4px 8px #ffffff;
+      outline: none;
+      transition: all 0.3s ease;
+
+      &:focus {
+        box-shadow: inset 6px 6px 12px #babecc, inset -6px -6px 12px #ffffff;
+      }
+    }
+  }
+}
+
+.group {
+  border: none;
+  background: #e0e5ec;
+  border-radius: 10px;
+  box-shadow: 20px 20px 60px #b8bcc2, -20px -20px 60px #ffffff;
+  padding: 2rem;
+  margin: 1rem 0;
+}
+
+.image-preview {
+  width: 100%;
+  height: 200px;
+  background: #e0e5ec;
+  border-radius: 10px;
+  box-shadow: inset 4px 4px 8px #babecc, inset -4px -4px 8px #ffffff;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: all 0.3s ease;
+
+  img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 10px;
+  }
+}
+
+.--btn {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #fff;
+  background: #149c7f;
+  border: none;
+  border-radius: 10px;
+  box-shadow: 6px 6px 12px #b8bcc2, -6px -6px 12px #ffffff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 4px 4px 8px #b8bcc2, -4px -4px 8px #ffffff;
+  }
+}
+
+.--btn-primary {
+  background: #149c7f;
+}

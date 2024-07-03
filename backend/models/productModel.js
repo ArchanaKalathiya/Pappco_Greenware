@@ -6,6 +6,10 @@ const productSchema = mongoose.Schema({
         required: true,
         ref: "User",
     },
+    selectedByUsers: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+    }],
     skuCode: { 
         type: String, 
         required: [true, "Please add SKU Code"],
@@ -23,7 +27,7 @@ const productSchema = mongoose.Schema({
     },
     image: { 
         type: mongoose.Schema.Types.Mixed, 
-        required: [false, "Please add image"],
+        required: false,
     },
     productDimensions: { 
         type: String, 
@@ -43,31 +47,31 @@ const productSchema = mongoose.Schema({
     },
     cartonCBM: { 
         type: Number,
-         required: [true, "Please add carton CBM"],
+        required: [true, "Please add carton CBM"],
     },
-    plainPrice: { 
+    print: { 
+        type: Boolean, 
+        required: [true, "Please add if print available or not"],
+    },
+    price: { 
         type: Number,
-         required: [true, "Please add plain price"],
+        required: [true, "Please add plain price"],
     },
     printPrice: { 
         type: Number,
-         required: [true, "Please add print price"],
+        required: false,
     },
-    plainLeadTime: {
+    leadTime: {
          type: String,
          required: [true, "Please add plain lead time"],
     },
     printLeadTime: {
          type: String,
-         required: [true, "Please add print lead time"],
+         required: false,
     },
-    rate: { 
+    noOfquantity:{
         type: Number,
-         required: [true, "Please add rate"],
-    },
-    quantity: { 
-        type: Number,
-        required: false,
+        required: [true, "Please add available product quantity"],
     },
     totalAmount: { 
         type: Number,
@@ -85,5 +89,28 @@ const productSchema = mongoose.Schema({
     timestamps: true
 });
 
+const userProductSelectionSchema = mongoose.Schema({
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    productId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product",
+    },
+    quantity: {
+      type: Number,
+      required: true,
+    },
+    print: {
+      type: Boolean,
+      required: true,
+    },
+  }, {
+    timestamps: true
+  });
+  
 const Product = mongoose.model("Product", productSchema);
-module.exports = Product;
+const UserProductSelection = mongoose.model("UserProductSelection", userProductSelectionSchema);
+
+module.exports = { Product, UserProductSelection }; 

@@ -1,106 +1,103 @@
-  import { React, useState } from "react";
-  import styles from "./auth.module.scss";
-  import { BiLogIn } from "react-icons/bi";
-  import { Link, useNavigate } from "react-router-dom";
-  import Card from "../../../components/card/card";
-  import { useDispatch } from "react-redux";
-  import { toast } from "react-toastify";
-  import { loginUser, validateEmail } from "../../../services/authService";
-  import {SET_LOGIN, SET_NAME} from "../../../redux/features/auth/authSlice";
-  import Loader from "../../../loader/Loader";
+import { React, useState } from "react";
+import styles from "./auth.module.scss";
+import { BiLogIn } from "react-icons/bi";
+import { Link, useNavigate } from "react-router-dom";
+import Card from "../../../components/card/card";
+import { useDispatch } from "react-redux";
+import { toast } from "react-toastify";
+import { loginUser, validateEmail } from "../../../services/authService";
+import { SET_LOGIN, SET_NAME, SET_USER } from "../../../redux/features/auth/authSlice";
+import Loader from "../../../loader/Loader";
 
-  const initialState = {
-    email: "",
-    password: "",
+const initialState = {
+  email: "",
+  password: "",
+};
+
+const Login = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState(initialState);
+  const { email, password } = formData;
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
   };
 
-  const Login = () => {
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
-    const [isLoading, setIsLoading] = useState(false);
-    const [formData, setFormData] = useState(initialState);
-    const { email,  password} = formData;
+  const login = async (e) => {
+    e.preventDefault();
 
-    
-    const handleInputChange = (e) => {
-      const { name, value } = e.target;
-      setFormData({ ...formData, [name]: value });
+    if (!email || !password) {
+      return toast.error("All fields are required");
+    }
+    if (password.length < 6) {
+      return toast.error("Passwords must be up to 6 characters");
+    }
+    if (!validateEmail(email)) {
+      return toast.error("Please enter a valid Email");
+    }
+
+    const userData = {
+      email, password
     };
+    setIsLoading(true)
+    try {
+      const data = await loginUser(userData);
+      console.log(data);
+      dispatch(SET_LOGIN(true));
+      dispatch(SET_NAME(data.name));
+      dispatch(SET_USER(data));
+      navigate("/dashboard");
+      setIsLoading(false);
+    } catch (error) {
+      setIsLoading(false);
+    }
+  };
 
-    const login = async(e) => {
-      e.preventDefault()
-      // console.log(formData);
-
-      if (!email || !password) {
-        return toast.error("All fields are required");
-      }
-      if (password.length < 6) {
-        return toast.error("Passwords must be up to 6 characters");
-      }
-      if (!validateEmail(email)) {
-        return toast.error("Please enter a valid Email");
-      }
-
-      const userData = {
-        email, password
-      };
-      setIsLoading(true)
-      try{
-        const data = await loginUser(userData);
-        // await new Promise(resolve => setTimeout(resolve, 5000)); //To Test Loader
-        console.log(data);
-        dispatch(SET_LOGIN(true));
-        dispatch(SET_NAME(data.name));
-        navigate("/dashboard");
-        setIsLoading(false);
-      }catch(error){
-        setIsLoading(false);
-      }
-
-    };
-
-    return (
-      <div className={`container ${styles.auth}`}>
+  return (
+    <div className={`container ${styles.auth}`}>
       {isLoading && <Loader />}
-        <Card>
-          <div className={styles.form}>
-            <div className="--flex-center">
-              <BiLogIn size={35} color="#999" />
-            </div>
-            <h2 className={styles.loginTitle}>Login</h2>
-
-            <form onSubmit={login}>
-              <input
-                type="email"
-                placeholder="Email"
-                required
-                name="email"
-                className={styles.input} autoComplete="email" value={email} onChange={handleInputChange} 
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                required
-                name="password"
-                className={styles.input} autoComplete="current-password" value={password} onChange={handleInputChange} 
-              />
-              <button type="submit" className="--btn --btn-primary --btn-block">
-                Login
-              </button>
-            </form>
-            <div className={styles.forgotPassword}>
-              <Link to="/forgotPassword">Forgot Password ?</Link>
-            </div>
-
-            <span className={styles.register}>
-              <Link to="/">Home</Link>
-              <p> &nbsp; Don't have an account? &nbsp;</p>
-              <Link to="/register">Sign up</Link>
-            </span>
+      <Card>
+        <div className={styles.form}>
+          <div className="--flex-center">
+            <BiLogIn size={35} color="#999" />
           </div>
-        </Card>
-      </div>
-    );
-  };
+          <h2 className={styles.loginTitle}>Login</h2>
 
-  export default Login;
+          <form onSubmit={login}>
+            <input
+              type="email"
+              placeholder="Email"
+              required
+              name="email"
+              className={styles.input} autoComplete="email" value={email} onChange={handleInputChange}
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              required
+              name="password"
+              className={styles.input} autoComplete="current-password" value={password} onChange={handleInputChange}
+            />
+            <button type="submit" className="--btn --btn-primary --btn-block">
+              Login
+            </button>
+          </form>
+          <div className={styles.forgotPassword}>
+            <Link to="/forgotPassword">Forgot Password ?</Link>
+          </div>
+
+          <span className={styles.register}>
+            <Link to="/">Home</Link>
+            <p> &nbsp; Don't have an account? &nbsp;</p>
+            <Link to="/register">Sign up</Link>
+          </span>
+        </div>
+      </Card>
+    </div>
+  );
+};
+
+export default Login;

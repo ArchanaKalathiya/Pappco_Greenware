@@ -3,7 +3,7 @@ const path = require('path');
 const pdf = require('html-pdf');
 const handlebars = require('handlebars');
 
-const generatePDF = (data, pdfName, callback) => {
+const generatePDF = (data, pdfPath, callback) => {
     const templatePath = path.resolve(__dirname, '../utils/quotationTemplate.hbs');
 
     if (!fs.existsSync(templatePath)) {
@@ -22,13 +22,18 @@ const generatePDF = (data, pdfName, callback) => {
     const html = template(data);
 
     const options = { format: 'A4' };
-    const outputPath = path.resolve(__dirname, '../uploads', pdfName);
 
-    pdf.create(html, options).toFile(outputPath, (err, res) => {
+    // Ensure directory exists
+    const dir = path.dirname(pdfPath);
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+    }
+
+    pdf.create(html, options).toFile(pdfPath, (err, res) => {
         if (err) {
             return callback(err);
         }
-        callback(null, pdfName); // Return just the PDF name
+        callback(null, pdfPath); // Return the full PDF path
     });
 };
 

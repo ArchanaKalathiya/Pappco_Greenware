@@ -5,18 +5,23 @@ import { RiProductHuntLine } from "react-icons/ri";
 import menu from "../../data/sidebar"; 
 import SidebarItem from "./SidebarItem";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { selectUser } from "../../redux/features/auth/authSlice";
 
+const allowedEmails = ["abhishek@pappcoindia.com", "digital@pappcoindia.com"];
 
 const Sidebar = ({ children }) => {
     const [isOpen, setIsOpen] = useState(true);
-
     const toggle = () => setIsOpen(!isOpen);
-
     const navigate = useNavigate();
+    const user = useSelector(selectUser);
 
     const goHome = () => {
-        navigate("/")
-    }
+        navigate("/");
+    };
+
+    // Ensure the email is trimmed
+    const userEmail = user.email ? user.email.trim() : "";
 
     return (
         <div className="layout">
@@ -29,11 +34,14 @@ const Sidebar = ({ children }) => {
                         <HiMenuAlt3 onClick={toggle} />
                     </div>
                 </div>
-                {menu.map((item,index) => {
-                    return <SidebarItem key={index} item={item} isOpen={isOpen}/>
+                {menu.map((item, index) => {
+                    if (item.title === "Add Product" && !allowedEmails.includes(userEmail)) {
+                        return null;
+                    }
+                    return <SidebarItem key={index} item={item} isOpen={isOpen} />;
                 })}
             </div>
-            <main style={{paddingLeft: isOpen ? "230px" : "40px", transition:"all .5s",}}>
+            <main style={{ paddingLeft: isOpen ? "230px" : "40px", transition: "all .5s" }}>
                 {children}
             </main>
         </div>

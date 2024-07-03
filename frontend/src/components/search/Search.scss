@@ -1,0 +1,57 @@
+.search {
+  margin: 10px 0;
+  position: relative;
+  width: 100%;
+  max-width: 300px;
+  background: #f0f0f0;
+  border: 1px solid #d1d1d1;
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.1), -4px -4px 8px rgba(255, 255, 255, 0.5);
+
+  input[type="text"] {
+    display: block;
+    width: calc(100% - 40px); /* Adjust based on the icon width and padding */
+    font-size: 1.6rem;
+    font-weight: 300;
+    padding: 8px;
+    border: none;
+    outline: none;
+    background: transparent;
+    box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.1), inset -2px -2px 4px rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    left: 13px;
+  }
+
+  .icon {
+    position: absolute;
+    top: 50%;
+    right: 20px; /* Adjust based on your design */
+    transform: translateY(-50%);
+    color: #888;
+  }
+}
+
+@media (max-width: 768px) {
+  .search {
+    max-width: 100%;
+  }
+
+  input[type="text"] {
+    font-size: 1.4rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .search {
+    padding: 8px;
+  }
+
+  input[type="text"] {
+    font-size: 1.2rem;
+  }
+
+  .icon {
+    right: 10px; /* Adjust based on your design */
+  }
+}

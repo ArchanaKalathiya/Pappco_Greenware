@@ -1,6 +1,6 @@
 import { FaTh, FaRegChartBar, FaCommentAlt } from "react-icons/fa";
 import { BiImageAdd } from "react-icons/bi";
-
+import {MdPreview} from "react-icons/md";
 const menu = [
   {
     title: "Dashboard",
@@ -31,6 +31,11 @@ const menu = [
     icon: <FaCommentAlt />,
     path: "/contact-us",
   },
+  // {
+  //   title: "View Your Product",
+  //   icon: <MdPreview />,
+  //   path: "/view-your-product",
+  // },
 ];
 
 export default menu;

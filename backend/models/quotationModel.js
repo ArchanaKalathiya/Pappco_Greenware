@@ -20,8 +20,8 @@ const quotationSchema = new mongoose.Schema({
             pcsPerCarton: { type: Number, required: true },
             cartonDimensions: { type: String, required: true },
             cartonCBM: { type: Number, required: true },
-            rate: { type: Number, required: true },
-            plainLeadTime: { type: String, required: true },
+            price: { type: Number, required: true },
+            leadTime: { type: String, required: true },
             quantity: { type: Number, required: true },
             amount: { type: Number, required: true }
         }

@@ -46,6 +46,7 @@ main {
   overflow: auto;
   color: var(--color-dark);
   transition: all 0.5s;
+  z-index: 1000; /* Ensure sidebar stays on top */
 }
 
 .top_section {

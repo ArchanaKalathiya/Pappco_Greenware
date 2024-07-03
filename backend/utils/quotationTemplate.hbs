@@ -63,6 +63,8 @@
                 <div class="user-details ml-4">
                     <p class="text-sm">User ID: {{user.id}}</p>
                     <p class="text-sm">Quotation No: {{quotationNumber}}</p>
+                    <p class="text-sm">Terms: {{terms}}</p>
+                    <p class="text-sm">Port Name: {{portName}}</p>
                     <p class="text-sm">Date: {{date}}</p>
                 </div>
             </div>
@@ -89,6 +91,7 @@
                         <th>Item Name</th>
                         <th>HSN</th>
                         <th>Product Dimensions</th>
+                        <th>View</th>
                         <th>Pcs per Carton</th>
                         <th>Carton Dimensions</th>
                         <th>Carton CBM</th>
@@ -105,11 +108,16 @@
                         <td>{{itemName}}</td>
                         <td>{{hsn}}</td>
                         <td>{{productDimensions}}</td>
+                        <td>
+                            <a href="{{imageUrl}}" target="_blank">
+                                <img src="{{imageUrl}}" alt="Product Image" style="max-width: 50px; max-height: 50px;">
+                            </a>
+                        </td>
                         <td>{{pcsPerCarton}}</td>
                         <td>{{cartonDimensions}}</td>
                         <td>{{cartonCBM}}</td>
-                        <td>{{rate}}</td>
-                        <td>{{plainLeadTime}}</td>
+                        <td>{{price}}</td>
+                        <td>{{leadTime}}</td>
                         <td>{{quantity}}</td>
                         <td>{{amount}}</td>
                     </tr>
@@ -117,7 +125,7 @@
                 </tbody>
                 <tfoot>
                     <tr>
-                        <td colspan="10" class="text-right font-bold">Grand Total:</td>
+                        <td colspan="11" class="text-right font-bold">Grand Total:</td>
                         <td class="font-bold">₹ {{totalAmount}}</td>
                     </tr>
                 </tfoot>

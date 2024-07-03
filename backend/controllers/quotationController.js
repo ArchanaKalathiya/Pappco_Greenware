@@ -6,169 +6,221 @@ const sendEmail = require('../utils/sendEmail');
 const path = require('path');
 const { format } = require('date-fns');
 
-let quotationCounter = 0;
-
 const quotation = asyncHandler(async (req, res) => {
-    const userId = req.user && req.user._id;
+    try {
+        const userId = req.user && req.user._id;
 
-    if (!userId) {
-        res.status(401);
-        throw new Error('User not authenticated');
-    }
+        if (!userId) {
+            res.status(401);
+            throw new Error('User not authenticated');
+        }
 
-    const productUpdates = req.body;
+        const { productUpdates, terms, portName } = req.body;
 
-    if (!Array.isArray(productUpdates) || productUpdates.length === 0) {
-        res.status(400);
-        throw new Error('Please provide an array of product updates');
-    }
-
-    let totalCBM = 0;
-    let totalAmount = 0;
-
-    const productsWithQuotation = await Promise.all(productUpdates.map(async (update) => {
-        const { productId, quantity, rate } = update;
-
-        if (!productId || !quantity || !rate) {
+        if (!Array.isArray(productUpdates) || productUpdates.length === 0) {
             res.status(400);
-            throw new Error('Each product update must include productId, quantity, and rate');
+            throw new Error('Please provide an array of product updates');
         }
 
-        const product = await Product.findOne({ _id: productId, user: userId });
-
-        if (!product) {
-            res.status(404);
-            throw new Error(`Product not found or does not belong to user: ${productId}`);
+        if (!terms) {
+            res.status(400);
+            throw new Error('Terms are required');
+        }
+        if (!portName) {
+            res.status(400);
+            throw new Error('Port name is required');
         }
 
-        const totalCBMProduct = quantity * product.cartonCBM;
-        const totalAmountProduct = quantity * rate;
+        let totalCBM = 0;
+        let totalAmount = 0;        
+        
+        const productsWithQuotation = await Promise.all(productUpdates.map(async (update) => {
+            const { productId, quantity } = update;
+        
+            if (!productId || !quantity) {
+                res.status(400);
+                throw new Error('Each product update must include productId, quantity, and price');
+            }
+            const product = await Product.findOne({ _id: productId });
 
-        product.quantity = quantity;
-        product.rate = rate;
-        product.totalCBM = totalCBMProduct;
-        product.totalAmount = totalAmountProduct;
+            if (!product) {
+                    res.status(404);
+                    throw new Error(`Product not found for ID: ${productId}`);
+            }
 
-        totalCBM += totalCBMProduct;
-        totalAmount += totalAmountProduct;
+            if (!product.selectedByUsers.includes(userId.toString())) {
+                    res.status(403);
+                    throw new Error(`Product does not belong to user: ${productId}`);
+            }
 
-        await product.save();
+            // Calculate total CBM for the product
+            const totalCBMProduct = quantity * product.cartonCBM;
+            totalCBM += parseFloat(totalCBMProduct.toFixed(4));
 
-        return {
-            skuCode: product.skuCode,
-            itemName: product.itemName,
-            hsn: product.hsn,
-            productDimensions: product.productDimensions,
-            pcsPerCarton: product.pcsPerCarton,
-            cartonDimensions: product.cartonDimensions,
-            cartonCBM: product.cartonCBM,
-            rate: rate,
-            plainLeadTime: product.plainLeadTime,
-            quantity: quantity,
-            amount: totalAmountProduct,
-        };
-    }));
+            let totalAmountProduct = 0;
 
-    quotationCounter += 1;
-    const quotationNumber = `Q${quotationCounter.toString().padStart(4, '0')}`;
+            // Determine the perCartonRate based on print status
+            const perCartonRate = product.pcsPerCarton * (product.print ? product.printPrice : product.price);
 
-    const userName = req.user.name || 'N/A';
-    const userAddress = req.user.address || 'N/A';
-    const userPostcode = req.user.postcode || 'N/A';
-    const userEmail = req.user.email || 'N/A';
-    const userContact = req.user.contact || 'N/A';
+            // product.leadTime = product.print && product.print === "true" ? product.printLeadTime : product.leadTime;
+            
+            // Calculate total amount of the product
+            totalAmountProduct = quantity * perCartonRate;
+            totalAmountProduct = parseFloat(totalAmountProduct.toFixed(2));
 
-    const formattedDate = format(new Date(), 'dd/MM/yyyy');
+            // Update price and lead time based on print status
+            const price = product.print ? product.printPrice : product.price;
+            const leadTime = product.print ? product.printLeadTime : product.leadTime;
 
-    const data = {
-        date: formattedDate,
-        quotationNumber,
-        user: {
-            id: userId,
-            name: userName,
-            address: userAddress,
-            postcode: userPostcode,
-            email: userEmail,
-            contact: userContact
-        },
-        products: productsWithQuotation,
-        totalCBM,
-        totalQty: productUpdates.reduce((total, update) => total + update.quantity, 0),
-        totalAmount
-    };
+            // Assign common attributes to product
+            product.quantity = quantity;
+            product.totalCBM = totalCBMProduct;
+            product.totalAmount = totalAmountProduct;
 
-    const pdfName = `${userName}_quotation_${quotationNumber}.pdf`;
+            // Calculate Grand Total Amount
+            totalAmount += totalAmountProduct;
 
-    generatePDF(data, pdfName, async (err, pdfFileName) => {
-        if (err) {
-            res.status(500);
-            throw new Error('Failed to generate PDF');
-        }
 
-        const emailSubject = `Quotation from Pappco Greenware - ${formattedDate}`;
-        const emailMessage = `
-            <p>Dear ${userName},</p>
-            <p>Please find the attached quotation PDF generated on ${formattedDate}.</p>
-            <p>Thank you for considering our products.</p>
-            <p>Best regards,</p>
-            <p>Pappco Greenware</p>
-        `;
+            await product.save();
 
-        //Email to user
-        await sendEmail(
-            emailSubject,
-            emailMessage,
-            req.user.email,
-            process.env.EMAIL_USER,
-            process.env.EMAIL_USER,
-            path.resolve(__dirname, '../uploads', pdfName)
-        );
+            return {
+                    skuCode: product.skuCode,
+                    itemName: product.itemName,
+                    hsn: product.hsn,
+                    productDimensions: product.productDimensions,
+                    pcsPerCarton: product.pcsPerCarton,
+                    cartonDimensions: product.cartonDimensions,
+                    cartonCBM: product.cartonCBM,
+                    print: product.print,
+                    price: price,
+                    leadTime: leadTime,
+                    quantity: quantity,
+                    amount: totalAmountProduct,
+                    imageUrl: product.image.filePath 
+                };
+        }));
 
-        //Email to inventory Staff
-        const inventoryEmailSubject = `${userName} - Generated Quotation - ${formattedDate}`;
-        const inventoryEmailMessage = `
-            <p>User Name: ${userName}</p>
-            <p>Email ID: ${userEmail}</p>
-            <p>Contact NO: ${userContact}</p>
-            <p>Post Code: ${userPostcode}</p>
-            <p>Address: ${userAddress}</p>
-            <p>${userName} has generated the attached Quotation ${quotationNumber}.</p>
-            <p>Please find the attached quotation PDF for details.</p>
-        `;
+        // Find the highest current quotationNumber and increment it
+        const lastQuotation = await Quotation.findOne().sort({ quotationNumber: -1 });
+        const lastQuotationNumber = lastQuotation ? parseInt(lastQuotation.quotationNumber.replace('Q', ''), 10) : 0;
+        const quotationNumber = `Q${(lastQuotationNumber + 1).toString().padStart(4, '0')}`;
+        
+        const userName = req.user.name || 'N/A';
+        const userAddress = req.user.address || 'N/A';
+        const userPostcode = req.user.postcode || 'N/A';
+        const userEmail = req.user.email || 'N/A';
+        const userContact = req.user.contact || 'N/A';
 
-        await sendEmail(
-            inventoryEmailSubject,
-            inventoryEmailMessage,
-            process.env.EMAIL_USER,
-            process.env.EMAIL_USER,
-            process.env.EMAIL_USER,
-            path.resolve(__dirname, '../uploads', pdfName)
-        );
-
-        // await Quotation.create({
-        //     date: formattedDate,
-        //     quotationNumber,
-        //     user: {
-        //       id: userId,
-        //       name: userName,
-        //       address: userAddress,
-        //       postcode: userPostcode,
-        //       email: userEmail,
-        //       contact: userContact
-        //     },
-        //     products: productsWithQuotation,
-        //     totalCBM,
-        //     totalQty: productUpdates.reduce((total, update) => total + update.quantity, 0),
-        //     totalAmount
-        //   });
-
-        res.status(200).json({
-            message: 'Quotation generated and email sent successfully',
+        const formattedDate = format(new Date(), 'dd/MM/yyyy');
+        
+        const data = {
+            date: formattedDate,
+            quotationNumber,
+            terms: terms, 
+            portName: portName,
+            user: {
+                id: userId,
+                name: userName,
+                address: userAddress,
+                postcode: userPostcode,
+                email: userEmail,
+                contact: userContact
+            },
             products: productsWithQuotation,
             totalCBM,
-            totalAmount,
+            totalQty: productUpdates.reduce((total, update) => total + update.quantity, 0),
+            totalAmount
+        };
+
+        const pdfName = `${userName}_quotation_${quotationNumber}.pdf`;
+        
+        const pdfPath = path.resolve(__dirname, '../uploads', pdfName);
+        
+        generatePDF(data, pdfPath, async (err) => {
+            if (err) {
+                res.status(500);
+                throw new Error('Failed to generate PDF');
+            }
+
+
+            const emailSubject = `Quotation from Pappco Greenware - ${formattedDate}`;
+            const emailMessage = `
+                <p>Dear ${userName},</p>
+                <p>Please find the attached quotation PDF generated on ${formattedDate}.</p>
+                <p>Thank you for considering our products.</p>
+                <p>Best regards,</p>
+                <p>Pappco Greenware</p>
+            `;
+ 
+
+            // Email to user
+            await sendEmail(
+                emailSubject,
+                emailMessage,
+                req.user.email,
+                process.env.EMAIL_USER,
+                process.env.EMAIL_USER,
+                {
+                    path: pdfPath,
+                    filename: pdfName
+                  }                
+            );
+
+            // Email to inventory Staff
+            const inventoryEmailSubject = `${userName} - Generated Quotation - ${formattedDate}`;
+            const inventoryEmailMessage = `
+                <p>User Name: ${userName}</p>
+                <p>Email ID: ${userEmail}</p>
+                <p>Contact NO: ${userContact}</p>
+                <p>Post Code: ${userPostcode}</p>
+                <p>Address: ${userAddress}</p>
+                <p>${userName} has generated the attached Quotation ${quotationNumber}.</p>
+                <p>Please find the attached quotation PDF for details.</p>
+            `;
+
+            // await sendEmail(
+            //     inventoryEmailSubject,
+            //     inventoryEmailMessage,
+            //     process.env.EMAIL_USER,
+            //     process.env.EMAIL_USER,
+            //     process.env.EMAIL_USER,
+            //     // path.resolve(__dirname, '../uploads', pdfName)
+            //     {
+            //     path: pdfPath,
+            //     filename: pdfName
+            //     }
+            // );
+
+            await Quotation.create({
+                date: formattedDate,
+                quotationNumber,
+                terms, 
+                portName,
+                user: {
+                    id: userId,
+                    name: userName,
+                    address: userAddress,
+                    postcode: userPostcode,
+                    email: userEmail,
+                    contact: userContact
+                },
+                products: productsWithQuotation,
+                totalCBM,
+                totalQty: productUpdates.reduce((total, update) => total + update.quantity, 0),
+                totalAmount
+            });
+
+            res.status(200).json({
+                message: 'Quotation generated and email sent successfully',
+                products: productsWithQuotation,
+                totalCBM,
+                totalAmount,
+            });
         });
-    });
+    } catch (error) {
+        console.error('Error generating quotation:', error.message);
+        res.status(500).json({ message: 'Failed to generate quotation', error: error.message });
+    }
 });
 
 const getQuotation = asyncHandler(async (req, res) => {
